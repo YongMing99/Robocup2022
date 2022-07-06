@@ -39,8 +39,9 @@ try:
 except:
     pass
 
-import rospy
+import rospy, os, sys
 import message_filters
+from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from opencv_apps.msg import FaceArrayStamped
 from opencv_apps.srv import FaceRecognitionTrain, FaceRecognitionTrainRequest
@@ -51,6 +52,8 @@ class FaceRecognitionTrainer(object):
         
         self.img_sub = message_filters.Subscriber("image", Image)
         self.face_sub = message_filters.Subscriber("faces", FaceArrayStamped)
+        rospy.init_node("face_recognition_trainer")
+        rospy.Subscriber('result', String, self.run)
         
         self.req = FaceRecognitionTrainRequest()
         self.label = ""
@@ -68,30 +71,35 @@ class FaceRecognitionTrainer(object):
             self.req.rects.append(faces.faces[0].face)
             self.req.labels.append(self.label)
             self.ok = False
-    def run(self):
+    def run(self, msg):
+        print(msg.data)
         rospy.wait_for_service("train")
         train = rospy.ServiceProxy("train", FaceRecognitionTrain)
-        self.label = input("Please input your name and press Enter: ")
-        while len(self.label) <= 0 or input("Your name is %s. Correct? [y/n]: " % self.label) not in ["", "y", "Y"]:
-            self.label = input("Please input your name and press Enter: ")
+        if 'name' in msg.data:
+            name = msg.data.split("is ")
+            print(name[1])
+            self.label = name[1]
+            while len(self.label) <= 0:
+                self.label = name[1]
+            print("Please stand at the center of the camera and say cheese: ")
 
-        input("Please stand at the center of the camera and press Enter: ")
-        while True:
-            self.ok = True
-            while self.ok:
-                print("taking picture...")
+        elif msg.data == 'cheese':
+            self.count = 1
+            while self.count<=5:
+                print("taking picture no",self.count)
+                self.count+=1
                 rospy.sleep(1)
-            if input("One more picture? [y/n]: ") not in ["", "y", "Y"]:
-                break
-        print("sending to trainer...")
-        
-        res = train(self.req)
-        if res.ok:
-            print("OK. Trained successfully!")
-        else:
-            print("NG. Error: %s" % res.error)
+            print("sending to trainer...")
+                
+            res = train(self.req)
+            if res.ok:
+                print("OK. Trained successfully!")
+            else:
+                print("NG. Error: %s" % res.error)
 
 if __name__ == '__main__':
-    rospy.init_node("face_recognition_trainer")
-    t = FaceRecognitionTrainer()
-    t.run()
+    try:
+        FaceRecognitionTrainer()
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        rospy.loginfo("Talkback node terminated.")
