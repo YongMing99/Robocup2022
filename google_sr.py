@@ -4,9 +4,10 @@ from std_msgs.msg import String
 import speech_recognition as sr
 
 def googlesr():
+    i = 0
     rospy.init_node('googlesr', anonymous=True)
     pub = rospy.Publisher('result', String, queue_size=10)
-
+    result = ['my name is ming', 'cheese']
     while not rospy.is_shutdown():
         # obtain audio from the microphone
         r = sr.Recognizer()
@@ -25,7 +26,11 @@ def googlesr():
         except sr.RequestError as e:
             print("Could not request results from Google Speech Recognition service; {0}".format(e))
         
-        pub.publish(result)
+        pub.publish(result[i])
+        i+=1
+        if i > 1:
+            i=0
+        rospy.sleep(5)
 
 if __name__ == '__main__':
     try:

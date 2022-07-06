@@ -51,7 +51,7 @@ class TalkBack:
             tts.save("speech.mp3")
             os.system("mpg321 speech.mp3")
             os.remove("speech.mp3")
-            
+            rospy.sleep(5)
 
         elif 'name' in msg.data:
             name = msg.data.split("is ")
@@ -60,8 +60,22 @@ class TalkBack:
             tts.save("speech.mp3")
             os.system("mpg321 speech.mp3")
             os.remove("speech.mp3")
+            rospy.sleep(1)
 
-        rospy.sleep(5)
+            text = "Please stand at the center of the camera and say cheese"
+            tts = gTTS(text)
+            tts.save("speech.mp3")
+            os.system("mpg321 speech.mp3")
+            os.remove("speech.mp3")
+            rospy.sleep(10)
+
+        else:
+            text = "Sorry. I could not understand."
+            tts = gTTS(text)
+            tts.save("speech.mp3")
+            os.system("mpg321 speech.mp3")
+            os.remove("speech.mp3")
+            rospy.sleep(5)
 
     def cleanup(self):
         self.soundhandle.stopAll()
