@@ -37,6 +37,9 @@ class TalkBack:
 
         # Subscribe to the recognizer output and set the callback function
         rospy.Subscriber('result', String, self.talkback)
+	rospy.Subscriber('position', String, self.intro)
+	self.name = ' '
+	self.item = ' '
         
     def talkback(self, msg):
         soundhandle = SoundClient()
@@ -53,9 +56,9 @@ class TalkBack:
             os.remove("speech.mp3")
             rospy.sleep(5)
 
-        elif 'name' in msg.data:
-            name = msg.data.split("is ")
-            text = "Nice to meet you" + name[1]+ ".My name is tuah."
+        elif 'I am ' in msg.data:
+            self.name = msg.data.split("am ")
+            text = "Nice to meet you" + self.name[1]+ ".My name is tuah."
             tts = gTTS(text)
             tts.save("speech.mp3")
             os.system("mpg321 speech.mp3")
@@ -67,11 +70,52 @@ class TalkBack:
             tts.save("speech.mp3")
             os.system("mpg321 speech.mp3")
             os.remove("speech.mp3")
-            rospy.sleep(10)
-
-        else:
-            text = "Sorry. I could not understand."
+            rospy.sleep(5)
+	
+	elif 'cheese' in msg.data or "she's" in msg.data or 'sis' in msg.data:
+            rospy.sleep(5)
+	    text = "Say cheese again to take more pictures"
             tts = gTTS(text)
+            tts.save("speech.mp3")
+            os.system("mpg321 speech.mp3")
+            os.remove("speech.mp3")
+            rospy.sleep(5)
+
+	elif 'can i have a ' in msg.data:
+	    self.item = msg.data.split("have a ")
+	    self.item = self.item[1]
+
+	elif msg.data == '.':
+            text = "."
+            tts = gTTS(text)
+            tts.save("speech.mp3")
+            os.system("mpg321 speech.mp3")
+            os.remove("speech.mp3")
+            rospy.sleep(5)
+	
+        else:
+            text = "."
+            tts = gTTS(text)
+            tts.save("speech.mp3")
+            os.system("mpg321 speech.mp3")
+            os.remove("speech.mp3")
+            rospy.sleep(5)
+
+    def intro(self, msg):
+	soundhandle = SoundClient()
+	times = 1
+	rospy.loginfo(msg.data)
+	if msg.data == 'a':
+	    text = "This is Mr " + self.name[1]
+	    tts = gTTS(text)
+            tts.save("speech.mp3")
+            os.system("mpg321 speech.mp3")
+            os.remove("speech.mp3")
+            rospy.sleep(5)
+	
+	if msg.data == 'b':
+	    text = "Can I have a " + self.item
+	    tts = gTTS(text)
             tts.save("speech.mp3")
             os.system("mpg321 speech.mp3")
             os.remove("speech.mp3")
@@ -87,4 +131,3 @@ if __name__=="__main__":
         rospy.spin()
     except rospy.ROSInterruptException:
         rospy.loginfo("Talkback node terminated.")
-
