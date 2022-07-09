@@ -54,7 +54,7 @@ class NavToPoint:
 		print(msg.data)
 		if 'thank you' in msg.data:
 			start = 1
-		elif 'can I have a water' in msg.data:
+		elif 'can I have' in msg.data:
 			start = 2
 		else:
 			start = 0
